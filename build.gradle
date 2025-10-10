@@ -27,8 +27,8 @@ android {
         multiDexEnabled true
         applicationId "com.sanbot.capaBot"
         minSdkVersion 19
-        versionCode 20201220
-        versionName "4.1.1" //change also proprieties.txt in Hari folder
+        versionCode 20250820
+        versionName "6.0.0" //change also proprieties.txt in Hari folder, config
 
         android.defaultConfig.javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
     }

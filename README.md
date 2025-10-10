@@ -2,13 +2,12 @@
 
 The code aims to give Sanbot robot basic interaction abilities. It wanders around avoiding obstacles, going back to the charging station when needed. The robot turns towards sources of noise, or voices, so its attention can be called.
 During the movement. a face detection module is used to trigger a voice interaction. (it includes a speech recognition module, a conversational engine to formulate the answers and the speech synthesis). The dialogue can be purpose-less, this means that no task is pursued except a normal and pleasant interaction. It is capable also of a task-oriented interaction, implemented in many example modules. Some allow Sanbot to present itself, project a story (of the organization) show the events in a synced calendar, shake hands, tell the weather, give directions, save suggestions from the customers, display web pages for info.
+(Compatible with Sanbot Elf or Sanbot Nano)
 
 #### You can find a more in deep discussion [here](https://amslaurea.unibo.it/19120/)
 
-<!--
 ## Video of the Result
-[![Sanbot Interaction](http://i3.ytimg.com/)](https://youtu.be/)
--->
+[![Sanbot Interaction](readme-images/thumb2.jpg)](https://youtu.be/NS-E7vC2SYs)
 
 ## Pipeline Implemented
 ![Alt text](readme-images/Pipeline.jpg?raw=true "Pipeline")
@@ -39,6 +38,7 @@ After the first installation, the app will be available in the section “APP Ma
 <br>**Version 3.0.8** - final Thesis version
 <br>**Version 4.0.0** - fixed AIML and AIML conversational engine
 <br>**Version 5.0.0** - passed at the new SDK 2.0.1.10
+<br>**Version 6.0.0** - Added Options, Fix Loading chatbot, Calendar, Weather, Directories Path
 
 ## Authors
 
