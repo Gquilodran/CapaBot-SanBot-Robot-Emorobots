@@ -1,94 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+
     xmlns:tools="http://schemas.android.com/tools"
+
     package="com.sanbot.capaBot">
+
     <!-- permissions -->
+
     <application
+
         android:name=".MyApp"
+
         android:allowBackup="true"
+
         android:icon="@mipmap/ic_launcher"
+
         android:label="@string/app_name"
+
         android:supportsRtl="true"
+
         android:theme="@style/AppTheme"
+
         tools:ignore="GoogleAppIndexingWarning">
+
         <!-- ACTIVITIES -->
+
         <activity
+
             android:name=".MyBaseActivity"
+
             android:exported="true"
+
             android:hardwareAccelerated="true"
+
             android:launchMode="singleTask">
+
             <intent-filter>
+
                 <action android:name="android.intent.action.MAIN" /> <!-- activity first -->
+
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
+
         </activity>
+
         <activity android:name=".MyCalendarActivity">
+
             <meta-data
+
                 android:name="RECOGNIZE_MODE"
+
                 android:value="1" />
+
         </activity>
+
         <activity android:name=".MyChargeActivity" />
+
         <activity
+
             android:name=".MyDialogActivity"
+
             android:hardwareAccelerated="true"
+
             android:windowSoftInputMode="stateHidden">
+
             <meta-data
+
                 android:name="RECOGNIZE_MODE"
+
                 android:value="1" />
+
         </activity>
+
         <activity android:name=".MyPresentActivity" />
+
         <activity
+
             android:name=".MyProjectStoryActivity"
+
             android:hardwareAccelerated="true" />
+
         <activity
+
             android:name=".MySettings"
+
             android:windowSoftInputMode="stateHidden"
+
             android:hardwareAccelerated="true" />
+
         <activity
+
             android:name=".MyShakeActivity"
+
             android:hardwareAccelerated="true" />
+
         <activity android:name=".MyWeatherActivity">
+
             <meta-data
+
                 android:name="RECOGNIZE_MODE"
+
                 android:value="1" />
+
         </activity>
+
         <activity android:name=".MyWebActivity">
+
             <meta-data
+
                 android:name="RECOGNIZE_MODE"
+
                 android:value="1" />
+
         </activity>
+
         <activity android:name=".MyXMLSuggestionActivity">
+
             <meta-data
+
                 android:name="RECOGNIZE_MODE"
+
                 android:value="1" />
+
         </activity>
+
+
 
         <activity android:name=".TestConversationalEngineActivity">
+
         </activity>
 
 
 
+
+
+
+
         <meta-data
+
             android:name="FORBID_TOUCH"
+
             android:value="true" />
+
         <meta-data
+
             android:name="FORBID_WAKE_RESPONSE"
+
             android:value="true" />
+
         <meta-data
+
             android:name="RECOGNIZE_MODE"
+
             android:value="1" />
 
         <provider
+
             android:name="com.sanbot.opensdk.utils.GrammarProvider"
+
             android:authorities="com.qihancloud.capaBot.grammar"
+
             android:exported="true" />
+
     </application>
+
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!-- <uses-feature android:name="android.hardware.camera" android:required="false"/>-->
+
+    <!-- <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>-->
+
+
+
+
+
 </manifest>
+

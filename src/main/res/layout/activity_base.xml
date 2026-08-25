@@ -22,27 +22,12 @@
                 android:textColor="@color/colorPrimary"
                 android:layout_marginTop="20dp"
                 android:textSize="40sp"
-                android:shadowColor="@color/colorBlack"
-                android:shadowRadius="2"
-                android:shadowDx="2"
-                android:shadowDy="2"
                 android:gravity="center"
-                android:padding="0dp"
                 android:text="@string/whatSee" />
             <TextView
                 android:id="@+id/presentationLock"
                 android:layout_width="1280px"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="10dp"
-                android:layout_marginTop="80dp"
-                android:text="@string/presentation_locked"
-                android:textSize="30sp"
-                android:textColor="@color/colorRed"
-                android:shadowColor="@color/colorBlack"
-                android:shadowRadius="2"
-                android:shadowDx="2"
-                android:shadowDy="2"
                 android:visibility="gone" />
         </RelativeLayout>
 
@@ -51,6 +36,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center_horizontal">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -58,14 +44,9 @@
                 <TextView
                     android:id="@+id/battery_base"
                     android:textSize="40sp"
-                    android:shadowRadius="2"
-                    android:shadowDx="2"
-                    android:shadowDy="2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:textColor="@color/colorPrimary"
-                    android:padding="0dp"
                     android:layout_marginEnd="30dp"
                     android:text="@string/battery" />
                 <Button
@@ -73,95 +54,61 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="20dp"
-                    android:layout_gravity="center"
                     android:textColor="@color/colorPrimary"
                     android:textSize="30sp"
-                    android:shadowRadius="2"
-                    android:shadowDx="2"
-                    android:shadowDy="2"
                     android:background="@drawable/button_borders"
-                    android:text="@string/exit"
-                    />
+                    android:text="@string/exit" />
             </LinearLayout>
+
             <ImageView
-                android:contentDescription="@string/navigation"
                 android:id="@+id/imageCompass"
                 android:layout_width="wrap_content"
                 android:layout_height="200dp"
-                android:src="@drawable/compass" />
+                android:src="@drawable/compass"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/textCompass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
             <Button
                 android:id="@+id/settings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textColor="@color/colorPrimary"
-                android:textSize="30sp"
-                android:shadowRadius="2"
-                android:shadowDx="2"
-                android:shadowDy="2"
-                android:padding="5sp"
-                android:background="@drawable/button_borders"
-                android:text="@string/settings"
-                />
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/DEBUG"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:visibility="gone">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center">
+                <TextView
+                    android:id="@+id/knowYouMeeting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-                    <TextView
-                        android:id="@+id/knowYouMeeting"
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:background="@color/colorPrimaryLight"
-                        android:gravity="center"
-                        android:text="@string/knowyoumeeting" />
-
-                    <TextView
-                        android:id="@+id/firstMeeting"
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:layout_margin="5dp"
-                        android:background="@color/colorPrimaryLight"
-                        android:gravity="center"
-                        android:padding="5dp"
-                        android:text="@string/firstmeeting" />
-
-                    <TextView
-                        android:id="@+id/textCompass"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/heading" />
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/firstMeeting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/name_face"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/face_name" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/time_face"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/time_of_detection" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/info_face"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/face_information" />
-
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </LinearLayout>
 
@@ -169,53 +116,75 @@
 
     <TextView
         android:id="@+id/handshakes"
-        android:textSize="30sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/colorPrimary"
-        android:padding="10dp"
-        android:text="@string/handshakes" />
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/start_interaction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:layout_gravity="center"
-        android:textColor="@color/colorPrimary"
-        android:textSize="30sp"
-        android:background="@drawable/button_borders"
-        android:text="@string/start_interaction"
-        />
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/loading"
-        android:textSize="40sp"
-        android:textColor="@color/colorPrimary"
-        android:shadowRadius="2"
-        android:shadowDx="2"
-        android:shadowDy="2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Loading..." />
+        android:visibility="gone" />
 
-    <ImageView
-        android:visibility="gone"
-        android:id="@+id/iv_capture"
-        android:scaleType="fitCenter"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
-    <TextView
-        android:visibility="gone"
-        android:id="@+id/tv_capture"
-        android:layout_width="300dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/colorPrimary"
+    <!-- ÚNICOS BOTONES VISIBLES EN PANTALLA -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
         android:gravity="center"
-        android:text="capture photo"
-        />
+        android:layout_marginTop="20dp">
+
+        <Button
+            android:id="@+id/btn_action_sad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="25dp"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
+            android:background="@drawable/button_borders"
+            android:text="Atrás (Triste)" />
+
+        <Button
+            android:id="@+id/btn_action_happy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="25dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
+            android:background="@drawable/button_borders"
+            android:text="Adelante (Feliz)" />
+
+        <Button
+            android:id="@+id/btn_action_neutral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="25dp"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
+            android:background="@drawable/button_borders"
+            android:text="Neutro" />
+
+    </LinearLayout>
+
+    <!-- IDS DE CAPTURA DE FOTOS OCULTOS PARA COMPATIBILIDAD CON BUTTERKNIFE -->
+    <ImageView
+        android:id="@+id/iv_capture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_capture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
 </LinearLayout>

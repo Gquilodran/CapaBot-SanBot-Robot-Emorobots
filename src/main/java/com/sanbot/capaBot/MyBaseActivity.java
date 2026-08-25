@@ -57,6 +57,8 @@ import com.sanbot.opensdk.function.unit.interfaces.media.MediaStreamListener;
 import com.sanbot.opensdk.function.unit.interfaces.speech.RecognizeListener;
 import com.sanbot.opensdk.function.unit.interfaces.speech.SpeakListener;
 import com.sanbot.opensdk.function.unit.interfaces.speech.WakenListener;
+import com.sanbot.opensdk.function.beans.EmotionsType;
+import com.sanbot.opensdk.function.beans.wheelmotion.DistanceWheelMotion;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -79,7 +81,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.sanbot.capaBot.MyUtils.compensationSanbotAngle;
 import static com.sanbot.capaBot.MyUtils.concludeSpeak;
 import static com.sanbot.capaBot.MyUtils.rotateAtRelativeAngle;
-
+import static com.sanbot.capaBot.MyUtils.temporaryEmotion;
 /**
  * Starting Activity.
  *  Handles the default state of the robot, looking for someone to help.
@@ -125,7 +127,12 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     Button settingsButt;
     @BindView(R.id.DEBUG)
     LinearLayout debugLayout;
-
+    @BindView(R.id.btn_action_sad)
+    Button btnActionSad;
+    @BindView(R.id.btn_action_happy)
+    Button btnActionHappy;
+    @BindView(R.id.btn_action_neutral)
+    Button btnActionNeutral;
     //robot managers
     private HDCameraManager hdCameraManager; //video, faceRec
     private SpeechManager speechManager; //voice, speechRec
@@ -140,6 +147,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     private VisionMediaDecoder mediaDecoder;
     private List<Integer> handleList = new ArrayList<>();
     private int mWidth, mHeight;
+
 
 
     /*** MY VARIABLES ***/
@@ -207,8 +215,8 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         svMedia.getHolder().addCallback(this);
         mediaDecoder = new VisionMediaDecoder();
         //float button of the system
-        systemManager.switchFloatBar(true, getClass().getName());
-
+//        systemManager.switchFloatBar(true, getClass().getName());
+        systemManager.switchFloatBar(false, getClass().getName());
         //check app permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, 12);
@@ -300,7 +308,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         updateView();
 
         //when everything initialized is not busy
-        busy = false;
+        busy = true;
     }
 
     @Override
@@ -631,10 +639,10 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     protected void onResume() {
         super.onResume();
         //resume after another activity occurred (typically Dialog)
+//        hardWareManager.setLED(new LED(LED.PART_ALL, LED.MODE_CLOSE, (byte) 1, (byte) 1));
         paused = false;
         updateView();
-        busy = false;
-        //new Handler to start walking again
+//        new Handler to start walking again
         wanderHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -646,69 +654,88 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 //initially sets the wander to on
                 wanderOnNow();
                 wanderOffNow();
-                wanderOnNow();
+//                wanderOnNow();
             }
         }, 1000);
         //stops the robot to start another recognition for X seconds
-        justGreeted = true;
-        if(MySettings.isDebug()){
-            presentationLock.setVisibility(View.VISIBLE);
-        }
-        //if there is a previous timer this is cancelled
-        if(countDownPresentationLocked != null) {
-            countDownPresentationLocked.cancel();
-        }
+//        justGreeted = true;
+//        if(MySettings.isDebug()){
+//            presentationLock.setVisibility(View.VISIBLE);
+//        }
+//        //if there is a previous timer this is cancelled
+//        if(countDownPresentationLocked != null) {
+//            countDownPresentationLocked.cancel();
+//        }
         //new Timer to unlock the interaction after secondsJustGreeted
-        countDownPresentationLocked = new CountDownTimer(MySettings.getSeconds_justGreeted()*1000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                String presentation_locked = getString(R.string.presentation_locked) + " " + millisUntilFinished / 1000;
-                presentationLock.setText(presentation_locked);
-            }
-
-            public void onFinish() {
-                justGreeted = false;
-                presentationLock.setVisibility(View.GONE);
-            }
-        }.start();
+//        countDownPresentationLocked = new CountDownTimer(MySettings.getSeconds_justGreeted()*1000, 1000) {
+//            public void onTick(long millisUntilFinished) {
+//                String presentation_locked = getString(R.string.presentation_locked) + " " + millisUntilFinished / 1000;
+//                presentationLock.setText(presentation_locked);
+//            }
+//
+//            public void onFinish() {
+//                justGreeted = false;
+//                presentationLock.setVisibility(View.GONE);
+//            }
+//        }.start();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        //Set parameters and open the media stream for video
+        // 1. Protección contra NullPointerException si la lista fue destruida previamente
+        if (handleList == null) {
+            handleList = new ArrayList<>();
+        }
+
+        // Parámetros de la transmisión de video
         StreamOption streamOption = new StreamOption();
         streamOption.setChannel(StreamOption.MAIN_STREAM);
         streamOption.setDecodType(StreamOption.HARDWARE_DECODE);
         streamOption.setJustIframe(false);
+
         OperationResult operationResult = hdCameraManager.openStream(streamOption);
-        Log.i(TAG, "surfaceCreated: operationResult=" + operationResult.getResult());
-        int result = Integer.valueOf(operationResult.getResult());
-        if (result != -1) {
-            handleList.add(result);
+        Log.i(TAG, "surfaceCreated: operationResult=" + (operationResult != null ? operationResult.getResult() : "null"));
+
+        if (operationResult != null && operationResult.getResult() != null) {
+            try {
+                int result = Integer.parseInt(operationResult.getResult());
+                if (result != -1) {
+                    handleList.add(result);
+                }
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Error al convertir el resultado del canal de video: " + e.getMessage());
+            }
         }
-        mediaDecoder.setSurface(holder.getSurface());
+
+        if (mediaDecoder != null) {
+            mediaDecoder.setSurface(holder.getSurface());
+        }
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+        // No requiere implementación
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.i(TAG, "surfaceDestroyed: ");
-        //Close media stream
-        if (handleList.size() > 0) {
-            for (int handle : handleList) {
-                Log.i(TAG, "surfaceDestroyed: " + hdCameraManager.closeStream(handle));
-            }
-        }
-        handleList = null;
-        mediaDecoder.stopDecoding();
-    }
+        Log.i(TAG, "surfaceDestroyed: Cerrando transmisiones de video");
 
-    //debug buttons
-    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting})
+        // 2. Comprobar que no sea null antes de evaluar el tamaño
+        if (handleList != null && !handleList.isEmpty()) {
+            for (int handle : handleList) {
+                Log.i(TAG, "surfaceDestroyed handle: " + hdCameraManager.closeStream(handle));
+            }
+            // Limpiar los elementos de la lista en lugar de volverla null
+            handleList.clear();
+        }
+
+        if (mediaDecoder != null) {
+            mediaDecoder.stopDecoding();
+        }
+    }
+    //debug buttons y botones de prueba de concepto
+    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_capture:
@@ -717,13 +744,23 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 break;
 
             case R.id.knowYouMeeting:
-                wanderOffNow();
-                startInteraction("debugger");
-                break;
+//                wanderOffNow();
+//                startInteraction("debugger");
+//                break;
 
             case R.id.firstMeeting:
-                wanderOffNow();
-                startInteraction("");
+//                wanderOffNow();
+//                startInteraction("");
+                break;
+            case R.id.btn_action_sad:
+                executeSadAction();
+                break;
+
+            case R.id.btn_action_happy:
+                executeHappyAction();
+                break;
+            case R.id.btn_action_neutral:
+                executeNeutralAction();
                 break;
         }
     }
@@ -775,10 +812,10 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
             }
 
             //start the dialog activity.
-            Intent myIntent = new Intent(MyBaseActivity.this, MyDialogActivity.class);
+//            Intent myIntent = new Intent(MyBaseActivity.this, MyDialogActivity.class);
             //insert the name of the person in the annex
-            myIntent.putExtra("name", person_name);
-            MyBaseActivity.this.startActivity(myIntent);
+//            myIntent.putExtra("name", person_name);
+//            MyBaseActivity.this.startActivity(myIntent);
             //terminate this activity
             finish();
         }
@@ -814,12 +851,117 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 
     public void updateView() {
         //update handshakesTextView
-        String handshakesStr = getString(R.string.handshakes) + " " + MySettings.getHandshakes();
-        handshakesTextView.setText(handshakesStr);
+//        String handshakesStr = getString(R.string.handshakes) + " " + MySettings.getHandshakes();
+//        handshakesTextView.setText(handshakesStr);
         //battery
         int battery_value = systemManager.getBatteryValue();
         batteryTV.setText("Battery: " + battery_value + "%");
     }
 
-    //END
+    /**
+     * Hay que actualizar esto, ya que el reproductor de video genera video aleatorio de los 48, hay qu ehacer que
+     * se envie un 0,1 o 2 a est parte pare ver que clase de video es y el robot pueda hacer correctamene el experimento
+     */
+
+
+    /**
+     * Acción 1 (Sad): Retrocede 20 cm, muestra emoción triste y LUEGO abre el video.
+     */
+    public void executeSadAction() {
+        Log.i(TAG, "Ejecutando accion triste secuencial");
+        wanderOffNow();
+
+        // 1. Mostrar emoción triste
+        temporaryEmotion(systemManager, EmotionsType.SLEEP, 10);
+        // 2. En executeSadAction() -> Color ROJO
+        LED led = new LED(LED.PART_ALL, LED.MODE_RED, (byte) 255);
+        hardWareManager.setLED(led);
+
+        AbsoluteAngleWingMotion absoluteAngleWingMotion = new AbsoluteAngleWingMotion(AbsoluteAngleWingMotion.PART_BOTH, 8, 270);
+        wingMotionManager.doAbsoluteAngleMotion(absoluteAngleWingMotion);
+        // 2. Mover hacia atrás 20 cm
+        DistanceWheelMotion motion = new DistanceWheelMotion(
+                DistanceWheelMotion.ACTION_BACK_RUN, 3, 20
+        );
+        wheelMotionManager.doDistanceMotion(motion);
+
+        // 3. Esperar a que termine de moverse para abrir el proyector
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+                intent.putExtra("ACTION_DURING_VIDEO", "sad");
+                startActivity(intent);
+            }
+        }, 3000); // 2.5 segundos para completar los 20 cm
+
+    }
+
+    /**
+     * Acción 2 (Happy): Avanza 20 cm, muestra emoción feliz y LUEGO abre el video.
+     */
+    public void executeHappyAction() {
+        Log.i(TAG, "Ejecutando accion feliz secuencial");
+
+        wanderOffNow();
+//        LocateAbsoluteAngleHeadMotion headUp = new LocateAbsoluteAngleHeadMotion(
+//                LocateAbsoluteAngleHeadMotion.ACTION_VERTICAL_LOCK, 90, 30
+//        );
+//        if (headMotionManager != null) {
+//            headMotionManager.doAbsoluteLocateMotion(headUp);
+//        }
+        // 1. Mostrar emoción feliz
+        temporaryEmotion(systemManager, EmotionsType.SMILE, 10);
+        // 2. Luz LED Amarilla (R: 255, G: 255, B: 0)
+        // 1. En executeHappyAction() -> Color AMARILLO
+        LED led = new LED(LED.PART_ALL, LED.MODE_YELLOW, (byte) 255);
+        hardWareManager.setLED(led);
+
+        AbsoluteAngleWingMotion absoluteAngleWingMotion = new AbsoluteAngleWingMotion(AbsoluteAngleWingMotion.PART_BOTH, 8, 90);
+        wingMotionManager.doAbsoluteAngleMotion(absoluteAngleWingMotion);
+
+        // 2. Mover hacia adelante 20 cm
+        DistanceWheelMotion motion = new DistanceWheelMotion(
+                DistanceWheelMotion.ACTION_FORWARD_RUN, 3,15
+        );
+        wheelMotionManager.doDistanceMotion(motion);
+
+        // 3. Esperar a que termine de moverse para abrir el proyector
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+                intent.putExtra("ACTION_DURING_VIDEO", "happy");
+                startActivity(intent);
+            }
+        }, 3000); // 2.5 segundos para completar los 20 cm
+    }
+
+    /**
+     * Acción 3 (Neutral): Establece emoción neutra, se mantiene estático y abre directamente el video.
+     */
+    public void executeNeutralAction() {
+        Log.i(TAG, "Ejecutando accion neutra");
+        wanderOffNow();
+
+        temporaryEmotion(systemManager, EmotionsType.NORMAL);
+
+        LED led = new LED(LED.PART_ALL, LED.MODE_BLUE, (byte)255);
+        hardWareManager.setLED(led);
+
+        Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+        intent.putExtra("ACTION_DURING_VIDEO", "neutral");
+        startActivity(intent);
+    }
+    //END part Carlos
+    /**
+     *Accion 4 (prueba), muestra n videos de forma aleatoria.
+     */
+    public void executePruebaAction (){
+
+    }
+    /**
+     * Accion 5: Esta es para mostrar los 48 videos de forma consecutiva y aleatoria
+     * Aquí estare el boton de panico en caso de y el log.txt
+     */
 }
