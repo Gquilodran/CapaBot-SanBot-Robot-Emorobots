@@ -31,3 +31,23 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 public class MyVideoRancomActivity {
 }
+
+/**
+ *         //reproducir video aleaoorio
+ *         videoView = findViewById(R.id.myvideoview);
+ *
+ *         int index = new Random().nextInt(carpetas.size());
+ *         int vid = new Random().nextInt(letras.size());
+ *         String carpetaElegida = carpetas.get(index);
+ *         String numero = String.valueOf(index);
+ *         String letra = letras.get(vid);
+ *         String nombreVideo = numero + letra + ".mp4"; // numero 0,1 o 2 dependiendo de la carpeta y tipo de video + letra identificacion de cada video + .mp4
+ *
+ *         String rutaAssets = "video/" + carpetaElegida + "/" + nombreVideo;
+ *         String rutaDestinoMemoria = Environment.getExternalStorageDirectory().getPath() + "/CAPABOT/" + carpetaElegida + "_" + nombreVideo;
+ *
+ *         File videoFile = new File(rutaDestinoMemoria);
+ *         if (!videoFile.exists()) {
+ *             copyAssetToStorage(rutaAssets, videoFile);
+ *         }
+ */

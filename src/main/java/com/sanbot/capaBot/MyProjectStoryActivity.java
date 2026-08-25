@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -53,7 +54,7 @@ public class MyProjectStoryActivity extends TopBaseActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
+        //Se crea un array de categorias
         List<String> carpetas = Arrays.asList("clase 0", "clase I", "clase II");
         List<String> letras = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p");
         register(MyProjectStoryActivity.class);
@@ -94,16 +95,26 @@ public class MyProjectStoryActivity extends TopBaseActivity {
 
         //reproducir video aleaoorio
         videoView = findViewById(R.id.myvideoview);
-
-        int index = new Random().nextInt(carpetas.size());
+        String actionDuringVideo = Intent.getIntent().getStringExtra("ACTION_DURING_VIDEO");
+        String carpeta_elegida = "";
+        if(actionDuringVideo == "sad"){
+            carpeta_elegida= String.valueOf(0);
+        }
+        if(actionDuringVideo == "happy"){
+            carpeta_elegida= String.valueOf(1);
+        }
+        if(actionDuringVideo == "neutral"){
+            carpeta_elegida= String.valueOf(2);
+        }
+        //int index = new Random().nextInt(carpetas.size());
         int vid = new Random().nextInt(letras.size());
-        String carpetaElegida = carpetas.get(index);
-        String numero = String.valueOf(index);
+        //String carpetaElegida = carpetas.get(index);
+        //String numero = String.valueOf(index);
         String letra = letras.get(vid);
-        String nombreVideo = numero + letra + ".mp4"; // numero 0,1 o 2 dependiendo de la carpeta y tipo de video + letra identificacion de cada video + .mp4
+        String nombreVideo = carpeta_elegida + letra + ".mp4"; // numero 0,1 o 2 dependiendo de la carpeta y tipo de video + letra identificacion de cada video + .mp4
 
-        String rutaAssets = "video/" + carpetaElegida + "/" + nombreVideo;
-        String rutaDestinoMemoria = Environment.getExternalStorageDirectory().getPath() + "/CAPABOT/" + carpetaElegida + "_" + nombreVideo;
+        String rutaAssets = "video/" + carpeta_elegida + "/" + nombreVideo;
+        String rutaDestinoMemoria = Environment.getExternalStorageDirectory().getPath() + "/CAPABOT/" + carpeta_elegida + "_" + nombreVideo;
 
         File videoFile = new File(rutaDestinoMemoria);
         if (!videoFile.exists()) {
