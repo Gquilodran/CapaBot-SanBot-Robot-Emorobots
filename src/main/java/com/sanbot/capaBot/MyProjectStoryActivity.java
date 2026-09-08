@@ -52,94 +52,129 @@ public class MyProjectStoryActivity extends TopBaseActivity {
     //video view for fullscreen
     VideoView videoView;
 
+    private void copyAssetToStorage(String assetPath, File destinationFile) {
+        try {
+            File parentDir = destinationFile.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            InputStream in = getAssets().open(assetPath);
+            OutputStream out = new FileOutputStream(destinationFile);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+
+            in.close();
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Error al copiar asset a almacenamiento: " + e.getMessage());
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //Se crea un array de categorias
         List<String> carpetas = Arrays.asList("clase 0", "clase I", "clase II");
         List<String> letras = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p");
+
         register(MyProjectStoryActivity.class);
-        //screen always on
+
+        // Screen always on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        //view
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_projector_story);
         ButterKnife.bind(this);
-        //init manager
+
+        // Init managers
         projectorManager = (ProjectorManager) getUnitManager(FuncConstant.PROJECTOR_MANAGER);
         speechManager = (SpeechManager) getUnitManager(FuncConstant.SPEECH_MANAGER);
         hardWareManager = (HardWareManager) getUnitManager(FuncConstant.HARDWARE_MANAGER);
-        //other settings
-        /*
-        projectorManager.setTrapezoidH(0);
-        projectorManager.setTrapezoidV(0);
-        projectorManager.setAcuity(0);
-        projectorManager.setSaturation(0);
-        projectorManager.setColor(0);
-        projectorManager.setBright(0);
-        projectorManager.setContrast(0);
-        projectorManager.setMirror(ProjectorManager.MIRROR_CLOSE);*/
 
-        //handler to open projector
+        // Handler to open projector
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "handler called to open projector");
-                //mode from settings
                 projectorManager.setMode(MySettings.getProjectorMode());
-                //OPEN PROJECTOR
                 projectorManager.switchProjector(true);
-                //voice introduction
-//                speechManager.startSpeak(getString(R.string.show_video), MySettings.getSpeakDefaultOption());
             }
         }, 500);
 
-        //reproducir video aleaoorio
+        // Reproducir video aleatorio
         videoView = findViewById(R.id.myvideoview);
-        String actionDuringVideo = Intent.getIntent().getStringExtra("ACTION_DURING_VIDEO");
-        String carpeta_elegida = "";
-        if(actionDuringVideo == "sad"){
-            carpeta_elegida= String.valueOf(0);
+
+        // Obtener la emoción desde el Intent con valor por defecto
+        String actionDuringVideo = getIntent() != null ? getIntent().getStringExtra("ACTION_DURING_VIDEO") : "";
+        String carpeta_elegida = "0"; // Valor por defecto si no coincide
+
+        if ("sad".equals(actionDuringVideo)) {
+            carpeta_elegida = "clase 0";
+        } else if ("neutral".equals(actionDuringVideo)) {
+            carpeta_elegida = "clase I";
+        } else if ("happy".equals(actionDuringVideo)) {
+            carpeta_elegida = "clase II";
         }
-        if(actionDuringVideo == "happy"){
-            carpeta_elegida= String.valueOf(1);
-        }
-        if(actionDuringVideo == "neutral"){
-            carpeta_elegida= String.valueOf(2);
-        }
+
+        // Seleccionar letra aleatoria y armar el nombre del archivo
         int vid = new Random().nextInt(letras.size());
-        //String carpetaElegida = carpetas.get(index);
-        //String numero = String.valueOf(index);
         String letra = letras.get(vid);
-        String nombreVideo = carpeta_elegida + letra + ".mp4"; // numero 0,1 o 2 dependiendo de la carpeta y tipo de video + letra identificacion de cada video + .mp4
+        String Celegida = "";
+        if(carpeta_elegida == "clase 0"){
+            Celegida = "0";
+        }
+        else if(carpeta_elegida == "clase I"){
+            Celegida = "1";
+        }
+        else if(carpeta_elegida == "clase II"){
+            Celegida = "2";
+        }
+        String nombreVideo = Celegida + letra + ".mp4"; // Ejemplo: 0a.mp4
 
+        // Ruta hacia la subcarpeta dentro de /sdcard/CAPABOT/
         String rutaAssets = "video/" + carpeta_elegida + "/" + nombreVideo;
-        String rutaDestinoMemoria = Environment.getExternalStorageDirectory().getPath() + "/CAPABOT/" + carpeta_elegida + "_" + nombreVideo;
+        // Cambia esta línea:
+        // File videoFile = new File(Environment.getExternalStorageDirectory(), "CAPABOT/" + carpeta_elegida + "/" + nombreVideo);
 
-        File videoFile = new File(rutaDestinoMemoria);
+        // Por esta (agregando el modificador final):
+        final File videoFile = new File(Environment.getExternalStorageDirectory(), "CAPABOT/" + carpeta_elegida + "/" + nombreVideo);
+        Log.i(TAG, "Buscando archivo en: " + videoFile.getAbsolutePath());
+
+        // Si no existe localmente, intentar copiar desde assets
         if (!videoFile.exists()) {
             copyAssetToStorage(rutaAssets, videoFile);
         }
-        videoView.setVideoURI(Uri.parse(rutaDestinoMemoria));
-        videoView.setMediaController(new MediaController(this));
-        videoView.requestFocus();
-        videoView.start();
-        videoView.pause();
 
-        Log.i(TAG, "Video Ready, waiting the projector to be ON");
+        // Cargar y preparar reproductor usando la ruta absoluta directa
+        if (videoFile.exists()) {
+            videoView.setVideoPath(videoFile.getAbsolutePath());
+            videoView.setMediaController(new MediaController(this));
+            videoView.requestFocus();
+            videoView.start();
+            videoView.pause();
+            Log.i(TAG, "Video cargado y pausado, esperando el proyector");
+        } else {
+            Log.e(TAG, "ERROR: No se encontró el video en " + videoFile.getAbsolutePath());
+        }
 
-        //handler to start video when the projector is effectively started
+        // Handler para iniciar video cuando el proyector esté listo
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "start video called");
-                videoView.start();
+                if (videoFile.exists()) {
+                    videoView.start();
+                }
 
                 // Apagar LEDs 8 segundos después
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         Log.i(TAG, "Apagando LEDs");
-
                         LED closeLed = new LED(LED.PART_ALL, LED.MODE_CLOSE);
                         hardWareManager.setLED(closeLed);
                     }
@@ -156,101 +191,6 @@ public class MyProjectStoryActivity extends TopBaseActivity {
             }
         });
     }
-
-    public void onTesis(Bundle savedInstanceState) {
-        //Se crea un array de categorias
-        List<String> carpetas = Arrays.asList("clase 0", "clase I", "clase II");
-        List<String> letras = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p");
-        register(MyProjectStoryActivity.class);
-        //screen always on
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        //view
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_projector_story);
-        ButterKnife.bind(this);
-        //init manager
-        projectorManager = (ProjectorManager) getUnitManager(FuncConstant.PROJECTOR_MANAGER);
-        speechManager = (SpeechManager) getUnitManager(FuncConstant.SPEECH_MANAGER);
-        hardWareManager = (HardWareManager) getUnitManager(FuncConstant.HARDWARE_MANAGER);
-        //other settings
-        /*
-        projectorManager.setTrapezoidH(0);
-        projectorManager.setTrapezoidV(0);
-        projectorManager.setAcuity(0);
-        projectorManager.setSaturation(0);
-        projectorManager.setColor(0);
-        projectorManager.setBright(0);
-        projectorManager.setContrast(0);
-        projectorManager.setMirror(ProjectorManager.MIRROR_CLOSE);*/
-
-        //handler to open projector
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(TAG, "handler called to open projector");
-                //mode from settings
-                projectorManager.setMode(MySettings.getProjectorMode());
-                //OPEN PROJECTOR
-                projectorManager.switchProjector(true);
-                //voice introduction
-//                speechManager.startSpeak(getString(R.string.show_video), MySettings.getSpeakDefaultOption());
-            }
-        }, 500);
-
-        //reproducir video aleaoorio
-        videoView = findViewById(R.id.myvideoview);
-        String actionDuringVideo = Intent.getIntent().getStringExtra("ACTION_DURING_VIDEO");
-        int vid = new Random().nextInt(letras.size());
-        String carpetaElegida = carpetas.get(index);
-        String numero = String.valueOf(index);
-        String letra = letras.get(vid);
-        String nombreVideo = carpeta_elegida + letra + ".mp4"; // numero 0,1 o 2 dependiendo de la carpeta y tipo de video + letra identificacion de cada video + .mp4
-
-        String rutaAssets = "video/" + carpeta_elegida + "/" + nombreVideo;
-        String rutaDestinoMemoria = Environment.getExternalStorageDirectory().getPath() + "/CAPABOT/" + carpeta_elegida + "_" + nombreVideo;
-
-        File videoFile = new File(rutaDestinoMemoria);
-        if (!videoFile.exists()) {
-            copyAssetToStorage(rutaAssets, videoFile);
-        }
-        videoView.setVideoURI(Uri.parse(rutaDestinoMemoria));
-        videoView.setMediaController(new MediaController(this));
-        videoView.requestFocus();
-        videoView.start();
-        videoView.pause();
-
-        Log.i(TAG, "Video Ready, waiting the projector to be ON");
-
-        //handler to start video when the projector is effectively started
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(TAG, "start video called");
-                videoView.start();
-
-                // Apagar LEDs 8 segundos después
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.i(TAG, "Apagando LEDs");
-
-                        LED closeLed = new LED(LED.PART_ALL, LED.MODE_CLOSE);
-                        hardWareManager.setLED(closeLed);
-                    }
-                }, 8000);
-            }
-        }, 2000);
-
-        initListeners();
-
-        exitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishThisActivity();
-            }
-        });
-    }
-
     public void initListeners() {
         // Al finalizar el video
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {

@@ -137,8 +137,6 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     Button btnActionHappy;
     @BindView(R.id.btn_action_neutral)
     Button btnActionNeutral;
-    @BindView(R.id.btn_action_random)
-    Button btnActionPrueba;
     //robot managers
     private HDCameraManager hdCameraManager; //video, faceRec
     private SpeechManager speechManager; //voice, speechRec
@@ -743,7 +741,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     }
 
     //debug buttons y botones de prueba de concepto
-    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_random})
+    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_capture:
@@ -769,9 +767,6 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 break;
             case R.id.btn_action_neutral:
                 executeNeutralAction();
-                break;
-            case R.id.btn_action_random:
-                executePruebaAction();
                 break;
         }
     }
@@ -966,11 +961,11 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     public void executePruebaAction() {
         List<String> videos = Arrays.asList("clase 0", "clase I", "clase II");
         int video = new Random().nextInt(videos.size());
-        if (video == 2) {
+        if (video == 1) {
             executeNeutralAction();
         } else if (video == 0) {
             executeSadAction();
-        } else if (video == 1) {
+        } else if (video == 2) {
             executeHappyAction();
         }
     }
@@ -978,7 +973,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     /**
      * Accion 5: Esta es para mostrar los 48 videos de forma consecutiva y aleatoria
      * Aquí estare el boton de panico en caso de y el log.txt
-     */
+
     public List<String> generarLista48Videos() {
         List<String> carpetas = Arrays.asList("0", "1", "2"); // 0=Sad/Negativa, 1=Happy/Positiva, 2=Neutral
         List<String> letras = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p");
@@ -1050,5 +1045,5 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 executeNeutralAction(videoId);
                 break;
         }
-    }
+    }*/
 }
