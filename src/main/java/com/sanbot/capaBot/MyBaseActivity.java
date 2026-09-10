@@ -137,6 +137,11 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     Button btnActionHappy;
     @BindView(R.id.btn_action_neutral)
     Button btnActionNeutral;
+    //Botones para video completo:
+    @BindView(R.id.btn_action_random)
+    Button btnActionRandom;
+    @BindView(R.id.btn_action_all)
+    Button btnActionAll;
     //robot managers
     private HDCameraManager hdCameraManager; //video, faceRec
     private SpeechManager speechManager; //voice, speechRec
@@ -741,7 +746,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     }
 
     //debug buttons y botones de prueba de concepto
-    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral})
+    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all, R.id.btn_action_random})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_capture:
@@ -767,6 +772,16 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 break;
             case R.id.btn_action_neutral:
                 executeNeutralAction();
+                break;
+                //Nuevos botones a probar
+            case R.id.btn_action_random: //Muestra una de tres opciones de videos
+                int selec = new Random().nextInt(3);
+                if(selec == 0){executeHappyAction();}
+                else if(selec == 1){executeSadAction();}
+                if(selec == 2){executeNeutralAction();}
+                break;
+            case R.id.btn_action_all: //Muestra en desorden los 48 videos
+                System.out.println("Se ejecuta esto, aun no esta listo");;
                 break;
         }
     }

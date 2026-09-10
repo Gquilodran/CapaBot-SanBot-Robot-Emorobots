@@ -132,6 +132,18 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
+    <!-- Botón que abre/cierra la barra de Triste/Feliz/Neutro -->
+    <Button
+        android:id="@+id/btn_toggle_actions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="25dp"
+        android:layout_marginEnd="20dp"
+        android:textColor="@color/colorPrimary"
+        android:textSize="30sp"
+        android:background="@drawable/button_borders"
+        android:text="Acciones" />
+
     <!-- ÚNICOS BOTONES VISIBLES EN PANTALLA -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -140,8 +152,53 @@
         android:gravity="center"
         android:layout_marginTop="20dp">
 
+        <!-- Barra colapsable: Triste / Feliz / Neutro -->
+        <LinearLayout
+            android:id="@+id/actions_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btn_action_sad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="25dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="30sp"
+                android:background="@drawable/button_borders"
+                android:text="Atrás (Triste)" />
+
+            <Button
+                android:id="@+id/btn_action_happy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="25dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="30sp"
+                android:background="@drawable/button_borders"
+                android:text="Adelante (Feliz)" />
+
+            <Button
+                android:id="@+id/btn_action_neutral"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="25dp"
+                android:layout_marginEnd="20dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="30sp"
+                android:background="@drawable/button_borders"
+                android:text="Neutro" />
+
+        </LinearLayout>
+
+        <!-- Siempre visibles -->
         <Button
-            android:id="@+id/btn_action_sad"
+            android:id="@+id/btn_action_random"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="25dp"
@@ -149,20 +206,10 @@
             android:textColor="@color/colorPrimary"
             android:textSize="30sp"
             android:background="@drawable/button_borders"
-            android:text="Atrás (Triste)" />
+            android:text="Prueba" />
 
         <Button
-            android:id="@+id/btn_action_happy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="25dp"
-            android:textColor="@color/colorPrimary"
-            android:textSize="30sp"
-            android:background="@drawable/button_borders"
-            android:text="Adelante (Feliz)" />
-
-        <Button
-            android:id="@+id/btn_action_neutral"
+            android:id="@+id/btn_action_all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="25dp"
@@ -170,7 +217,7 @@
             android:textColor="@color/colorPrimary"
             android:textSize="30sp"
             android:background="@drawable/button_borders"
-            android:text="Neutro" />
+            android:text="Experimento" />
 
     </LinearLayout>
 
