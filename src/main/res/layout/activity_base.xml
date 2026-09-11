@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -153,50 +154,41 @@
         android:layout_marginTop="20dp">
 
         <!-- Barra colapsable: Triste / Feliz / Neutro -->
-        <LinearLayout
-            android:id="@+id/actions_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/btn_action_sad"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="25dp"
-                android:layout_marginEnd="20dp"
-                android:textColor="@color/colorPrimary"
-                android:textSize="30sp"
-                android:background="@drawable/button_borders"
-                android:text="Atrás (Triste)" />
-
-            <Button
-                android:id="@+id/btn_action_happy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="25dp"
-                android:layout_marginEnd="20dp"
-                android:textColor="@color/colorPrimary"
-                android:textSize="30sp"
-                android:background="@drawable/button_borders"
-                android:text="Adelante (Feliz)" />
-
-            <Button
-                android:id="@+id/btn_action_neutral"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="25dp"
-                android:layout_marginEnd="20dp"
-                android:textColor="@color/colorPrimary"
-                android:textSize="30sp"
-                android:background="@drawable/button_borders"
-                android:text="Neutro" />
-
-        </LinearLayout>
 
         <!-- Siempre visibles -->
+        <Button
+            android:id="@+id/btn_action_sad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="25dp"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
+            android:background="@drawable/button_borders"
+            android:text="Atrás (Triste)"
+            tools:ignore="DuplicateIds" />
+
+        <Button
+            android:id="@+id/btn_action_happy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="25dp"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
+            android:background="@drawable/button_borders"
+            android:text="Adelante (Feliz)" />
+
+        <Button
+            android:id="@+id/btn_action_neutral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="25dp"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
+            android:background="@drawable/button_borders"
+            android:text="Neutro" />
         <Button
             android:id="@+id/btn_action_random"
             android:layout_width="wrap_content"
@@ -207,7 +199,6 @@
             android:textSize="30sp"
             android:background="@drawable/button_borders"
             android:text="Prueba" />
-
         <Button
             android:id="@+id/btn_action_all"
             android:layout_width="wrap_content"
@@ -218,6 +209,7 @@
             android:textSize="30sp"
             android:background="@drawable/button_borders"
             android:text="Experimento" />
+
 
     </LinearLayout>
 
