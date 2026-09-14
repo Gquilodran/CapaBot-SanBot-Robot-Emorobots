@@ -109,31 +109,21 @@ public class MyProjectStoryActivity extends TopBaseActivity {
         videoView = findViewById(R.id.myvideoview);
 
         // Obtener la emoción desde el Intent con valor por defecto
-        String actionDuringVideo = getIntent() != null ? getIntent().getStringExtra("ACTION_DURING_VIDEO") : "";
-        String carpeta_elegida = "0"; // Valor por defecto si no coincide
+        String actionDuringVideo = (getIntent() != null && getIntent().getStringExtra("ACTION_DURING_VIDEO") != null)
+                ? getIntent().getStringExtra("ACTION_DURING_VIDEO")
+                : "";
 
-        if ("sad".equals(actionDuringVideo)) {
+        String carpeta_elegida = "clase 0"; // Valor por defecto si no coincide
+
+        if (actionDuringVideo.startsWith("0")) {
             carpeta_elegida = "clase 0";
-        } else if ("neutral".equals(actionDuringVideo)) {
+        } else if (actionDuringVideo.startsWith("1")) {
             carpeta_elegida = "clase I";
-        } else if ("happy".equals(actionDuringVideo)) {
+        } else if (actionDuringVideo.startsWith("2")) {
             carpeta_elegida = "clase II";
         }
 
-        // Seleccionar letra aleatoria y armar el nombre del archivo
-        int vid = new Random().nextInt(letras.size());
-        String letra = letras.get(vid);
-        String Celegida = "";
-        if(carpeta_elegida == "clase 0"){
-            Celegida = "0";
-        }
-        else if(carpeta_elegida == "clase I"){
-            Celegida = "1";
-        }
-        else if(carpeta_elegida == "clase II"){
-            Celegida = "2";
-        }
-        String nombreVideo = Celegida + letra + ".mp4"; // Ejemplo: 0a.mp4
+        String nombreVideo = actionDuringVideo;
 
         // Ruta hacia la subcarpeta dentro de /sdcard/CAPABOT/
         String rutaAssets = "video/" + carpeta_elegida + "/" + nombreVideo;
