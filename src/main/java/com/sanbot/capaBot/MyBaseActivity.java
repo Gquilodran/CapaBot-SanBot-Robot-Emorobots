@@ -1040,36 +1040,18 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         eliminaPrimerVideoVector();
         Log.i(TAG, "Ejecutando accion neutra");
         wanderOffNow();
-        LED led;
         switch (elegido.charAt(0)) {
             // CASO SAD
             case '0':
-                // Guardamos que el robot se movió hacia ATRÁS
-                lastMovementDirection = MOVE_BACKWARD;
-                // 1. Mostrar emoción triste
-                temporaryEmotion(systemManager, EmotionsType.SLEEP, 10);
-                // 2. En executeSadAction() -> Color ROJO
-                led = new LED(LED.PART_ALL, LED.MODE_RED, (byte) 255);
+                executeSadAction(elegido);
                 break;
             case '1':
-                lastMovementDirection = MOVE_NONE;
-                temporaryEmotion(systemManager, EmotionsType.NORMAL);
-                led = new LED(LED.PART_ALL, LED.MODE_BLUE, (byte)255);
+                executeNeutralAction(elegido);
                 break;
             default:
-                lastMovementDirection = MOVE_NONE;
-                temporaryEmotion(systemManager, EmotionsType.NORMAL);
-                led = new LED(LED.PART_ALL, LED.MODE_YELLOW, (byte) 255);
-
-                break; // Optional for the final default case
+                executeHappyAction(elegido);
+                break;
         }
-        hardWareManager.setLED(led);
-
-        Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
-        intent.putExtra("ACTION_DURING_VIDEO", elegido);
-
-        startActivity(intent);
-        Log.i(TAG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE I");
     }
 
 }
