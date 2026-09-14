@@ -1036,8 +1036,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     }
 
     public void executeAllAction(){
-        String elegido = listaVideos.get(0);
-        eliminaPrimerVideoVector();
+        String elegido = eliminaPrimerVideoVector();
         Log.i(TAG, "Ejecutando accion neutra");
         wanderOffNow();
         switch (elegido.charAt(0)) {
