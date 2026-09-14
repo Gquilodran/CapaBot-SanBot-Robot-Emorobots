@@ -97,6 +97,13 @@ import static com.sanbot.capaBot.MyUtils.temporaryEmotion;
 public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Callback {
 
     private final static String TAG = "IGOR-BAS";
+    // Constants for movement tracking
+    private static final String MOVE_NONE = "NONE";
+    private static final String MOVE_FORWARD = "FORWARD";
+    private static final String MOVE_BACKWARD = "BACKWARD";
+
+    // Stores the last movement executed by actions
+    private String lastMovementDirection = MOVE_NONE;
 
     //view objects
     @BindView(R.id.sv_media)
@@ -138,8 +145,6 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     @BindView(R.id.btn_action_neutral)
     Button btnActionNeutral;
     //Botones para video completo:
-    @BindView(R.id.btn_action_random)
-    Button btnActionRandom;
     @BindView(R.id.btn_action_all)
     Button btnActionAll;
     //robot managers
@@ -184,7 +189,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 
     //head motion
     LocateAbsoluteAngleHeadMotion locateAbsoluteAngleHeadMotion = new LocateAbsoluteAngleHeadMotion(
-            LocateAbsoluteAngleHeadMotion.ACTION_VERTICAL_LOCK, 90, 30
+            LocateAbsoluteAngleHeadMotion.ACTION_VERTICAL_LOCK,90,30
     );
     RelativeAngleHeadMotion relativeHeadMotionDOWN = new RelativeAngleHeadMotion(RelativeAngleHeadMotion.ACTION_DOWN, 30);
 
@@ -197,7 +202,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         register(MyBaseActivity.class);
         //screen always on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         //set view
         setContentView(R.layout.activity_base);
@@ -205,7 +210,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         //set visibility of loading and button
         loadingText.setVisibility(View.VISIBLE);
         startInteraction.setVisibility(View.GONE);
-        if (MySettings.isDebug()) {
+        if(MySettings.isDebug()){
             debugLayout.setVisibility(View.VISIBLE);
         } else {
             debugLayout.setVisibility(View.GONE);
@@ -272,7 +277,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 updateView();
                 //grab battery value
                 int battery_value = systemManager.getBatteryValue();
-                Log.i("IGOR-BAS-BAT", "Battery: " + battery_value);
+                Log.i("IGOR-BAS-BAT", "Battery: "+ battery_value);
                 //if battery connected deactivate autocharge
                 if (systemManager.getBatteryStatus() == systemManager.STATUS_CHARGE_LINE || systemManager.getBatteryStatus() == systemManager.STATUS_CHARGE_PILE) {
                     MySettings.setAutoChargeAllowed(false);
@@ -291,15 +296,15 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                     checkBatteryStatusHandler.postDelayed(this, 1000 * MySettings.getSeconds_checkingBattery());
                 }
             }
-        }, 1000 * MySettings.getSeconds_checkingBattery());
+        }, 1000*MySettings.getSeconds_checkingBattery());
 
 
         //cyclic check bot loaded
         checkBotReadyHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Log.i("IGOR-BAS-BOT", "BOT: " + MyApp.botReady);
-                if (MyApp.botReady) {
+                Log.i("IGOR-BAS-BOT", "BOT: "+ MyApp.botReady);
+                if (MyApp.botReady){
                     loadingText.setVisibility(View.GONE);
                     startInteraction.setVisibility(View.VISIBLE);
                     checkBotReadyHandler.removeCallbacksAndMessages(null);
@@ -346,7 +351,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 infoFace.setText(sb.toString());
                 //taking face name
                 String user_name = list.get(0).getUser();
-                if (user_name != null) {
+                if (user_name != null){
                     nameFace.setText(user_name);
                 } else {
                     nameFace.setText(R.string.unknown);
@@ -354,11 +359,11 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 //time of detection
                 time_face.setText(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.ITALY).format(Calendar.getInstance().getTime()));
 
-                Log.i(TAG, ">>>>FACE DETECTED " + user_name);
+                Log.i(TAG,">>>>FACE DETECTED " + user_name );
 
                 //selects function
                 if (!busy) {
-                    if (!speechManager.isSpeaking().equals("1")) {
+                    if (!speechManager.isSpeaking().equals("1") ) {
                         if (!justGreeted) {
                             //responses
                             //stop wander
@@ -429,7 +434,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         //Speech recognition callback
         speechManager.setOnSpeechListener(new RecognizeListener() {
             @Override
-            public void onRecognizeText(@NonNull RecognizeTextBean recognizeTextBean) {
+            public void onRecognizeText( @NonNull RecognizeTextBean recognizeTextBean) {
 
             }
 
@@ -438,14 +443,14 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 //IGOR: not exceed 300ms
                 //Blocked only if RECOGNIZE_MODE is set to 1 in Manifest and this function returns true
                 lastRecognizedSentence = grammar.getText().toLowerCase();
-                Log.i(TAG, ">>>>Recognized voice: " + lastRecognizedSentence + "/" + grammar.getTopic());
+                Log.i(TAG, ">>>>Recognized voice: "+ lastRecognizedSentence + "/"+ grammar.getTopic());
                 return true;
             }
 
             @Override
             public void onRecognizeVolume(int i) {
                 //value range at 0~30
-                Log.i("speechmanager", "volume detected to " + String.valueOf(i));
+                Log.i("speechmanager", "volume detected to "+ String.valueOf(i));
             }
 
             @Override
@@ -460,7 +465,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 
             @Override
             public void onError(int i, int i1) {
-                Log.i("speechmanager", "onError: i=" + i + " i1=" + i1);
+                Log.i("speechmanager", "onError: i="+i+" i1="+i1);
             }
         });
         //Speech synthesis state callback
@@ -476,7 +481,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         hardWareManager.setOnHareWareListener(new PIRListener() {
             @Override
             public void onPIRCheckResult(boolean isCheck, int part) {
-                if (part != 1) {
+                if(part != 1) {
                     //if it's the back PIR
                     Log.i(TAG, "PIR back triggered -> rotating");
                     if (!busy && MySettings.isSoundRotationAllowed()) {
@@ -494,7 +499,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         hardWareManager.setOnHareWareListener(new VoiceLocateListener() {
             @Override
             public void voiceLocateResult(int angle) {
-                Log.i(TAG, "voice located at : " + angle);
+                Log.i(TAG,"voice located at : " + angle);
                 //if it is idle
                 if (!busy && MySettings.isSoundRotationAllowed()) {
                     //stop wander
@@ -516,7 +521,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                             wanderOffNow();
                             wanderOnNow();
                         }
-                    }, 1000 * MySettings.getSeconds_waitingToWanderAfterSoundLocalization());
+                    }, 1000* MySettings.getSeconds_waitingToWanderAfterSoundLocalization());
                 }
             }
         });
@@ -542,10 +547,10 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                     facing = "SOUTH";
                 } else if (degreeCorrected > 225 && degreeCorrected <= 315) {
                     facing = "WEST";
-                } else {
+                } else  {
                     facing = "NORTH";
                 }
-                String correctedStr = "Corrected: " + (int) degreeCorrected + " degrees (" + (int) v + "), facing: " + facing;
+                String correctedStr ="Corrected: " + (int)degreeCorrected + " degrees (" +(int)v+"), facing: " + facing;
                 textComp.setText(correctedStr);
                 //animation
                 // create a rotation animation (reverse turn degree degrees)
@@ -579,10 +584,9 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                                 Log.i("hwmanager", "touching hand left");
                                 break;
                             case 10:
-                                Log.i("hwmanager", "touching hand right");
+                                Log.i("hwmanager", "touching hand right" );
                                 break;
-                            case 1:
-                            case 2:
+                            case 1 : case 2:
                                 speechManager.startSpeak("ehy, don't touch", MySettings.getSpeakDefaultOption());
 
                         }
@@ -598,7 +602,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         startInteraction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!busy) {
+                if(!busy) {
                     wanderOffNow();
                     //increment stats of button interaction
                     MySettings.incrementInteractionButton();
@@ -652,6 +656,40 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 //        hardWareManager.setLED(new LED(LED.PART_ALL, LED.MODE_CLOSE, (byte) 1, (byte) 1));
         paused = false;
         updateView();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if (MOVE_FORWARD.equals(lastMovementDirection)) {
+
+                    Log.i(TAG,"Regresando desde adelante");
+
+                    DistanceWheelMotion motion =
+                            new DistanceWheelMotion(
+                                    DistanceWheelMotion.ACTION_BACK_RUN,
+                                    3,
+                                    20);
+
+                    wheelMotionManager.doDistanceMotion(motion);
+
+                } else if (MOVE_BACKWARD.equals(lastMovementDirection)) {
+
+                    Log.i(TAG,"Regresando desde atrás");
+
+                    DistanceWheelMotion motion =
+                            new DistanceWheelMotion(
+                                    DistanceWheelMotion.ACTION_FORWARD_RUN,
+                                    3,
+                                    20);
+
+                    wheelMotionManager.doDistanceMotion(motion);
+                }
+
+                lastMovementDirection = MOVE_NONE;
+
+            }
+        },8500);   // espera 8.5 segundos
 //        new Handler to start walking again
         wanderHandler.postDelayed(new Runnable() {
             @Override
@@ -746,7 +784,24 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     }
 
     //debug buttons y botones de prueba de concepto
-    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all, R.id.btn_action_random})
+    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all})
+    List<String> listaVideos = new ArrayList<>();
+
+    // FUNCIÓN 1: Genera los 48 nombres ordenados, los desordena y reproduce el primero
+    public void iniciarSecuenciaVideos() {
+        listaVideos.clear();
+        String[] carpetas = {"0", "1", "2"};
+
+        for (String carpeta : carpetas) {
+            for (int i = 0; i < 16; i++) {
+                char letra = (char) ('a' + i);
+                listaVideos.add(carpeta + letra + ".mp4");
+            }
+        }
+
+        // 2. Desordenar el vector
+        Collections.shuffle(listaVideos);
+    }
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_capture:
@@ -764,22 +819,16 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 //                startInteraction("");
                 break;
             case R.id.btn_action_sad:
-                executeSadAction();
+                executeSadAction("0a.mp4");
                 break;
 
             case R.id.btn_action_happy:
-                executeHappyAction();
+                executeHappyAction("1a.mp4");
                 break;
             case R.id.btn_action_neutral:
-                executeNeutralAction();
+                executeNeutralAction("2a.mp4");
                 break;
                 //Nuevos botones a probar
-            case R.id.btn_action_random: //Muestra una de tres opciones de videos
-                int selec = new Random().nextInt(3);
-                if(selec == 0){executeHappyAction();}
-                else if(selec == 1){executeSadAction();}
-                if(selec == 2){executeNeutralAction();}
-                break;
             case R.id.btn_action_all: //Muestra en desorden los 48 videos
                 System.out.println("Se ejecuta esto, aun no esta listo");;
                 break;
@@ -845,14 +894,13 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 
     public void wanderOnNow() {
         if (!busy) {
-            if (MySettings.isDebug()) {
+            if (MySettings.isDebug()){
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(MyBaseActivity.this, "Wander " + MySettings.isWanderAllowed() + " now", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MyBaseActivity.this, "Wander " + MySettings.isWanderAllowed()+" now", Toast.LENGTH_SHORT).show();
                     }
-                });
-            }
+                });}
             modularMotionManager.switchWander(MySettings.isWanderAllowed());
             Log.i(TAG, "Wander " + MySettings.isWanderAllowed() + " now");
         }
@@ -865,8 +913,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 public void run() {
                     Toast.makeText(MyBaseActivity.this, "Wander off now", Toast.LENGTH_SHORT).show();
                 }
-            });
-        }
+            });}
         modularMotionManager.switchWander(false);
         Log.i(TAG, "Wander forced off now");
     }
@@ -883,10 +930,11 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     /**
      * Acción 1 (Sad): Retrocede 20 cm, muestra emoción triste y LUEGO abre el video.
      */
-    public void executeSadAction() {
+    public void executeSadAction(String nombreVideo) {
         Log.i(TAG, "Ejecutando accion triste secuencial");
         wanderOffNow();
-
+        // Guardamos que el robot se movió hacia ATRÁS
+        lastMovementDirection = MOVE_BACKWARD;
         // 1. Mostrar emoción triste
         temporaryEmotion(systemManager, EmotionsType.SLEEP, 10);
         // 2. En executeSadAction() -> Color ROJO
@@ -908,24 +956,27 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
                 intent.putExtra("ACTION_DURING_VIDEO", "sad");
                 startActivity(intent);
+                Log.i(TAG, "EVENTO: Reproduciendo video " + codigoVideo + " | Pertenece a: CLASE 0");
             }
-        }, 3000); // 2.5 segundos para completar los 20 cm
-
+        }, 3000);
     }
 
     /**
      * Acción 2 (Happy): Avanza 20 cm, muestra emoción feliz y LUEGO abre el video.
      */
-    public void executeHappyAction() {
+    public void executeHappyAction(String nombreVideo) {
         Log.i(TAG, "Ejecutando accion feliz secuencial");
 
         wanderOffNow();
-//        LocateAbsoluteAngleHeadMotion headUp = new LocateAbsoluteAngleHeadMotion(
-//                LocateAbsoluteAngleHeadMotion.ACTION_VERTICAL_LOCK, 90, 30
-//        );
-//        if (headMotionManager != null) {
-//            headMotionManager.doAbsoluteLocateMotion(headUp);
-//        }
+        // Guardamos que el robot se movió hacia ADELANTE
+        lastMovementDirection = MOVE_FORWARD;
+        LocateAbsoluteAngleHeadMotion headLeft = new LocateAbsoluteAngleHeadMotion(
+                LocateAbsoluteAngleHeadMotion.ACTION_BOTH_LOCK, 0, 30
+        );
+
+        if (headMotionManager != null) {
+            headMotionManager.doAbsoluteLocateMotion(headLeft);
+        }
         // 1. Mostrar emoción feliz
         temporaryEmotion(systemManager, EmotionsType.SMILE, 10);
         // 2. Luz LED Amarilla (R: 255, G: 255, B: 0)
@@ -938,10 +989,17 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 
         // 2. Mover hacia adelante 20 cm
         DistanceWheelMotion motion = new DistanceWheelMotion(
-                DistanceWheelMotion.ACTION_FORWARD_RUN, 3, 15
+                DistanceWheelMotion.ACTION_FORWARD_RUN, 3,20
         );
         wheelMotionManager.doDistanceMotion(motion);
 
+        LocateAbsoluteAngleHeadMotion headCenter = new LocateAbsoluteAngleHeadMotion(
+                LocateAbsoluteAngleHeadMotion.ACTION_BOTH_LOCK, 0, 90
+        );
+
+        if (headMotionManager != null) {
+            headMotionManager.doAbsoluteLocateMotion(headCenter);
+        }
         // 3. Esperar a que termine de moverse para abrir el proyector
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -949,6 +1007,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
                 intent.putExtra("ACTION_DURING_VIDEO", "happy");
                 startActivity(intent);
+                Log.i(TAG, "EVENTO: Reproduciendo video " + codigoVideo + " | Pertenece a: CLASE II");
             }
         }, 3000); // 2.5 segundos para completar los 20 cm
     }
@@ -956,18 +1015,20 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     /**
      * Acción 3 (Neutral): Establece emoción neutra, se mantiene estático y abre directamente el video.
      */
-    public void executeNeutralAction() {
+    public void executeNeutralAction(String nombreVideo) {
         Log.i(TAG, "Ejecutando accion neutra");
         wanderOffNow();
-
+        // No hubo movimiento de ruedas
+        lastMovementDirection = MOVE_NONE;
         temporaryEmotion(systemManager, EmotionsType.NORMAL);
 
-        LED led = new LED(LED.PART_ALL, LED.MODE_BLUE, (byte) 255);
+        LED led = new LED(LED.PART_ALL, LED.MODE_BLUE, (byte)255);
         hardWareManager.setLED(led);
 
         Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
         intent.putExtra("ACTION_DURING_VIDEO", "neutral");
         startActivity(intent);
+        Log.i(TAG, "EVENTO: Reproduciendo video " + codigoVideo + " | Pertenece a: CLASE I");
     }
 
     /**public void executeAllAction(){

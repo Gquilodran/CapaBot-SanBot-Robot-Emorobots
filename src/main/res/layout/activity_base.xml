@@ -133,17 +133,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <!-- Botón que abre/cierra la barra de Triste/Feliz/Neutro -->
-    <Button
-        android:id="@+id/btn_toggle_actions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="25dp"
-        android:layout_marginEnd="20dp"
-        android:textColor="@color/colorPrimary"
-        android:textSize="30sp"
-        android:background="@drawable/button_borders"
-        android:text="Acciones" />
+
 
     <!-- ÚNICOS BOTONES VISIBLES EN PANTALLA -->
     <LinearLayout
@@ -153,10 +143,8 @@
         android:gravity="center"
         android:layout_marginTop="20dp">
 
-        <!-- Barra colapsable: Triste / Feliz / Neutro -->
 
-        <!-- Siempre visibles -->
-        <Button
+        <!--<Button
             android:id="@+id/btn_action_sad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -188,17 +176,8 @@
             android:textColor="@color/colorPrimary"
             android:textSize="30sp"
             android:background="@drawable/button_borders"
-            android:text="Neutro" />
-        <Button
-            android:id="@+id/btn_action_random"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="25dp"
-            android:layout_marginEnd="20dp"
-            android:textColor="@color/colorPrimary"
-            android:textSize="30sp"
-            android:background="@drawable/button_borders"
-            android:text="Prueba" />
+            android:text="Neutro" />-->
+
         <Button
             android:id="@+id/btn_action_all"
             android:layout_width="wrap_content"

@@ -161,20 +161,21 @@ public class MyProjectStoryActivity extends TopBaseActivity {
             Log.e(TAG, "ERROR: No se encontró el video en " + videoFile.getAbsolutePath());
         }
 
-        // Handler para iniciar video cuando el proyector esté listo
+        Log.i(TAG, "Video Ready, waiting the projector to be ON");
+
+        //handler to start video when the projector is effectively started
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "start video called");
-                if (videoFile.exists()) {
-                    videoView.start();
-                }
+                videoView.start();
 
                 // Apagar LEDs 8 segundos después
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         Log.i(TAG, "Apagando LEDs");
+
                         LED closeLed = new LED(LED.PART_ALL, LED.MODE_CLOSE);
                         hardWareManager.setLED(closeLed);
                     }
@@ -191,6 +192,7 @@ public class MyProjectStoryActivity extends TopBaseActivity {
             }
         });
     }
+
     public void initListeners() {
         // Al finalizar el video
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -220,6 +222,7 @@ public class MyProjectStoryActivity extends TopBaseActivity {
     }
 
     private void finishThisActivity() {
+
         //starts dialog activity
         Intent myIntent = new Intent(MyProjectStoryActivity.this, MyDialogActivity.class);
         MyProjectStoryActivity.this.startActivity(myIntent);
