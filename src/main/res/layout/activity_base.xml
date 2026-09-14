@@ -144,7 +144,7 @@
         android:layout_marginTop="20dp">
 
 
-        <!--<Button
+        <Button
             android:id="@+id/btn_action_sad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -176,7 +176,7 @@
             android:textColor="@color/colorPrimary"
             android:textSize="30sp"
             android:background="@drawable/button_borders"
-            android:text="Neutro" />-->
+            android:text="Neutro" />
 
         <Button
             android:id="@+id/btn_action_all"

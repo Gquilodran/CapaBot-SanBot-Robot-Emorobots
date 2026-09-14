@@ -784,10 +784,8 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     }
 
     //debug buttons y botones de prueba de concepto
-    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all})
-    List<String> listaVideos = new ArrayList<>();
 
-    // FUNCIÓN 1: Genera los 48 nombres ordenados, los desordena y reproduce el primero
+    List<String> listaVideos = new ArrayList<>();
     public void iniciarSecuenciaVideos() {
         listaVideos.clear();
         String[] carpetas = {"0", "1", "2"};
@@ -798,10 +796,17 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 listaVideos.add(carpeta + letra + ".mp4");
             }
         }
-
-        // 2. Desordenar el vector
         Collections.shuffle(listaVideos);
     }
+    public void eliminaPrimerVideoVector(){
+        if (listaVideos.isEmpty()) {
+            Log.d("SanbotLog", "Se han reproducido todos los videos.");
+            return;
+        }
+        String videoActual = listaVideos.remove(0);
+        Log.d("SanbotLog", "Se pasa al siguiente Video");
+    }
+    @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_capture:
@@ -828,8 +833,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
             case R.id.btn_action_neutral:
                 executeNeutralAction("2a.mp4");
                 break;
-                //Nuevos botones a probar
-            case R.id.btn_action_all: //Muestra en desorden los 48 videos
+            case R.id.btn_action_all:
                 System.out.println("Se ejecuta esto, aun no esta listo");;
                 break;
         }
@@ -956,7 +960,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
                 intent.putExtra("ACTION_DURING_VIDEO", "sad");
                 startActivity(intent);
-                Log.i(TAG, "EVENTO: Reproduciendo video " + codigoVideo + " | Pertenece a: CLASE 0");
+                Log.i(TAG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE 0");
             }
         }, 3000);
     }
@@ -1007,7 +1011,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
                 intent.putExtra("ACTION_DURING_VIDEO", "happy");
                 startActivity(intent);
-                Log.i(TAG, "EVENTO: Reproduciendo video " + codigoVideo + " | Pertenece a: CLASE II");
+                Log.i(TAG, "EVENTO: Reproduciendo video "  + " | Pertenece a: CLASE II");
             }
         }, 3000); // 2.5 segundos para completar los 20 cm
     }
@@ -1028,7 +1032,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
         intent.putExtra("ACTION_DURING_VIDEO", "neutral");
         startActivity(intent);
-        Log.i(TAG, "EVENTO: Reproduciendo video " + codigoVideo + " | Pertenece a: CLASE I");
+        Log.i(TAG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE I");
     }
 
     /**public void executeAllAction(){
