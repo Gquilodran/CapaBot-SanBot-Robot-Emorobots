@@ -129,8 +129,6 @@ public class MyProjectStoryActivity extends TopBaseActivity {
         String rutaAssets = "video/" + carpeta_elegida + "/" + nombreVideo;
         // Cambia esta línea:
         // File videoFile = new File(Environment.getExternalStorageDirectory(), "CAPABOT/" + carpeta_elegida + "/" + nombreVideo);
-
-        // Por esta (agregando el modificador final):
         final File videoFile = new File(Environment.getExternalStorageDirectory(), "CAPABOT/" + carpeta_elegida + "/" + nombreVideo);
         Log.i(TAG, "Buscando archivo en: " + videoFile.getAbsolutePath());
 

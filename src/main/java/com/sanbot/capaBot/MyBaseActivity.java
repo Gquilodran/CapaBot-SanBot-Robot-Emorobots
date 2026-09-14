@@ -204,6 +204,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
+        iniciarSecuenciaVideos();
         //set view
         setContentView(R.layout.activity_base);
         ButterKnife.bind(this);
@@ -796,13 +797,14 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         }
         Collections.shuffle(listaVideos);
     }
-    public void eliminaPrimerVideoVector(){
+    public String eliminaPrimerVideoVector(){
         if (listaVideos.isEmpty()) {
             Log.d(TAG, "Se han reproducido todos los videos.");
-            return;
+            return "LOL";
         }
         String videoActual = listaVideos.remove(0);
         Log.d(TAG, "Se pasa al siguiente Video");
+        return videoActual;
     }
     @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all})
     public void onViewClicked(View view) {
@@ -832,7 +834,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 executeNeutralAction("2a.mp4");
                 break;
             case R.id.btn_action_all:
-                System.out.println("Se ejecuta esto, aun no esta listo");;
+                executeAllAction();
                 break;
         }
     }
@@ -1032,4 +1034,42 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         startActivity(intent);
         Log.i(TAG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE I");
     }
+
+    public void executeAllAction(){
+        String elegido = listaVideos.get(0);
+        eliminaPrimerVideoVector();
+        Log.i(TAG, "Ejecutando accion neutra");
+        wanderOffNow();
+        LED led;
+        switch (elegido.charAt(0)) {
+            // CASO SAD
+            case '0':
+                // Guardamos que el robot se movió hacia ATRÁS
+                lastMovementDirection = MOVE_BACKWARD;
+                // 1. Mostrar emoción triste
+                temporaryEmotion(systemManager, EmotionsType.SLEEP, 10);
+                // 2. En executeSadAction() -> Color ROJO
+                led = new LED(LED.PART_ALL, LED.MODE_RED, (byte) 255);
+                break;
+            case '1':
+                lastMovementDirection = MOVE_NONE;
+                temporaryEmotion(systemManager, EmotionsType.NORMAL);
+                led = new LED(LED.PART_ALL, LED.MODE_BLUE, (byte)255);
+                break;
+            default:
+                lastMovementDirection = MOVE_NONE;
+                temporaryEmotion(systemManager, EmotionsType.NORMAL);
+                led = new LED(LED.PART_ALL, LED.MODE_YELLOW, (byte) 255);
+
+                break; // Optional for the final default case
+        }
+        hardWareManager.setLED(led);
+
+        Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+        intent.putExtra("ACTION_DURING_VIDEO", elegido);
+
+        startActivity(intent);
+        Log.i(TAG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE I");
+    }
+
 }
