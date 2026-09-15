@@ -1037,10 +1037,10 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
 
     public void executeAllAction(){
         String elegido = eliminaPrimerVideoVector();
-        Log.i(TAG, "Ejecutando accion neutra");
+        String nombreClase = elegido.startsWith("0") ? "Clase 0" : elegido.startsWith("1") ? "Clase I" : elegido.startsWith("2") ? "Clase II" : "Desconocida";
+        Log.i(TAG, "Ejecutando accion" + nombreClase + "video:"+ elegido);
         wanderOffNow();
         switch (elegido.charAt(0)) {
-            // CASO SAD
             case '0':
                 executeSadAction(elegido);
                 break;
@@ -1051,6 +1051,10 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 executeHappyAction(elegido);
                 break;
         }
+        if (!("LOL".equals(elegido))) {
+            Log.i(TAG, "Videos restantes en la lista: " + listaVideos.size());
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {executeAllAction();}}, 5000);}
     }
-
 }
