@@ -67,6 +67,11 @@ public class VisionMediaDecoder {
      * Decode and display the video stream
      *
      */
+
+    public boolean isFinished(){
+        if (videoInputBuffers==null){return true;}
+        return false;
+    }
     public void drawVideoSample(ByteBuffer sampleData) {
         try {
             lock.lock();

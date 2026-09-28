@@ -1,5 +1,6 @@
 package com.sanbot.capaBot;
 
+import java.util.concurrent.TimeUnit;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -85,6 +86,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.sanbot.capaBot.MyUtils.compensationSanbotAngle;
 import static com.sanbot.capaBot.MyUtils.concludeSpeak;
 import static com.sanbot.capaBot.MyUtils.rotateAtRelativeAngle;
+import static com.sanbot.capaBot.MyUtils.sleepy;
 import static com.sanbot.capaBot.MyUtils.temporaryEmotion;
 /**
  * Starting Activity.
@@ -166,6 +168,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
     /*** MY VARIABLES ***/
     //better with getter & setter
     public static boolean busy = false;
+    public static String ECG = "ECG-Signal";
 
     //if it's just greeted with someone it doesn't greet for X seconds (timer starts from beginning of presentation)
     private boolean justGreeted = false;
@@ -803,7 +806,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
             return "LOL";
         }
         String videoActual = listaVideos.remove(0);
-        Log.d(TAG, "Se pasa al siguiente Video");
+        Log.d(ECG, "Se pasa al siguiente Video");
         return videoActual;
     }
     @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all})
@@ -935,7 +938,7 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
      * Acción 1 (Sad): Retrocede 20 cm, muestra emoción triste y LUEGO abre el video.
      */
     public void executeSadAction(final String nombreVideo) {
-        Log.i(TAG, "Ejecutando accion triste secuencial");
+        Log.i(ECG, "Ejecutando accion triste secuencial");
         wanderOffNow();
         // Guardamos que el robot se movió hacia ATRÁS
         lastMovementDirection = MOVE_BACKWARD;
@@ -960,16 +963,16 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
                 intent.putExtra("ACTION_DURING_VIDEO", nombreVideo);
                 startActivity(intent);
-                Log.i(TAG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE 0");
+                Log.i(ECG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE 0");
             }
-        }, 0);
+        }, 2500);
     }
 
     /**
      * Acción 2 (Happy): Avanza 20 cm, muestra emoción feliz y LUEGO abre el video.
      */
     public void executeHappyAction(final String nombreVideo) {
-        Log.i(TAG, "Ejecutando accion feliz secuencial");
+        Log.i(ECG, "Ejecutando accion feliz secuencial");
 
         wanderOffNow();
         // Guardamos que el robot se movió hacia ADELANTE
@@ -1011,16 +1014,16 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
                 intent.putExtra("ACTION_DURING_VIDEO", nombreVideo);
                 startActivity(intent);
-                Log.i(TAG, "EVENTO: Reproduciendo video "  + " | Pertenece a: CLASE II");
+                Log.i(ECG, "EVENTO: Reproduciendo video "  + " | Pertenece a: CLASE II");
             }
-        }, 0); // 2.5 segundos para completar los 20 cm
+        }, 2500); // 2.5 segundos para completar los 20 cm
     }
 
     /**
      * Acción 3 (Neutral): Establece emoción neutra, se mantiene estático y abre directamente el video.
      */
     public void executeNeutralAction(String nombreVideo) {
-        Log.i(TAG, "Ejecutando accion neutra");
+        Log.i(ECG, "Ejecutando accion neutra");
         wanderOffNow();
         // No hubo movimiento de ruedas
         lastMovementDirection = MOVE_NONE;
@@ -1032,14 +1035,13 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
         intent.putExtra("ACTION_DURING_VIDEO", nombreVideo);
         startActivity(intent);
-        Log.i(TAG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE I");
+        Log.i(ECG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE I");
     }
 
     public void executeAllAction(){
         String elegido = eliminaPrimerVideoVector();
         String nombreClase = elegido.startsWith("0") ? "Clase 0" : elegido.startsWith("1") ? "Clase I" : elegido.startsWith("2") ? "Clase II" : "Desconocida";
-        Log.i(TAG, "Ejecutando accion" + nombreClase + "video:"+ elegido);
-        wanderOffNow();
+        Log.i(ECG, "Ejecutando accion" + nombreClase + "video:"+ elegido);
         switch (elegido.charAt(0)) {
             case '0':
                 executeSadAction(elegido);
@@ -1047,14 +1049,17 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
             case '1':
                 executeNeutralAction(elegido);
                 break;
-            default:
+            case '2':
                 executeHappyAction(elegido);
+            default:
+                //video de despedida ?
                 break;
         }
         if (!("LOL".equals(elegido))) {
-            Log.i(TAG, "Videos restantes en la lista: " + listaVideos.size());
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {executeAllAction();}}, 5000);}
+            Log.i(ECG, "Videos restantes en la lista: " + listaVideos.size());
+            while(!mediaDecoder.isFinished()){}
+            executeAllAction();
+        }
+
     }
 }
