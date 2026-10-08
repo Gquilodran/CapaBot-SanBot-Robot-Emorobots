@@ -29,4 +29,12 @@
         android:layout_height="fill_parent">
     </VideoView>
 
+    <ImageView
+        android:id="@+id/iv_static_image"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/project"
+        android:visibility="gone" />
+
 </RelativeLayout>

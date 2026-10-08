@@ -207,7 +207,6 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
-        iniciarSecuenciaVideos();
         //set view
         setContentView(R.layout.activity_base);
         ButterKnife.bind(this);
@@ -787,28 +786,6 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         }
     }
 
-    List<String> listaVideos = new ArrayList<>();
-    public void iniciarSecuenciaVideos() {
-        listaVideos.clear();
-        String[] carpetas = {"0", "1", "2"};
-
-        for (String carpeta : carpetas) {
-            for (int i = 0; i < 16; i++) {
-                char letra = (char) ('a' + i);
-                listaVideos.add(carpeta + letra + ".mp4");
-            }
-        }
-        Collections.shuffle(listaVideos);
-    }
-    public String eliminaPrimerVideoVector(){
-        if (listaVideos.isEmpty()) {
-            Log.d(TAG, "Se han reproducido todos los videos.");
-            return "LOL";
-        }
-        String videoActual = listaVideos.remove(0);
-        Log.d(ECG, "Se pasa al siguiente Video");
-        return videoActual;
-    }
     @OnClick({R.id.tv_capture, R.id.knowYouMeeting, R.id.firstMeeting, R.id.btn_action_sad, R.id.btn_action_happy, R.id.btn_action_neutral, R.id.btn_action_all})
     public void onViewClicked(View view) {
         switch (view.getId()) {
@@ -818,26 +795,41 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
                 break;
 
             case R.id.knowYouMeeting:
-//                wanderOffNow();
-//                startInteraction("debugger");
-//                break;
+                break;
 
             case R.id.firstMeeting:
-//                wanderOffNow();
-//                startInteraction("");
                 break;
+
             case R.id.btn_action_sad:
-                executeSadAction("0a.mp4");
+                {
+                    Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+                    intent.putExtra("ACTION_DURING_VIDEO", "0a.mp4");
+                    startActivity(intent);
+                }
                 break;
 
             case R.id.btn_action_happy:
-                executeHappyAction("1a.mp4");
+                {
+                    Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+                    intent.putExtra("ACTION_DURING_VIDEO", "2a.mp4");
+                    startActivity(intent);
+                }
                 break;
+
             case R.id.btn_action_neutral:
-                executeNeutralAction("2a.mp4");
+                {
+                    Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+                    intent.putExtra("ACTION_DURING_VIDEO", "1a.mp4");
+                    startActivity(intent);
+                }
                 break;
+
             case R.id.btn_action_all:
-                executeAllAction();
+                {
+                    Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
+                    intent.putExtra("ACTION_TYPE", "ALL");
+                    startActivity(intent);
+                }
                 break;
         }
     }
@@ -932,134 +924,5 @@ public class  MyBaseActivity extends TopBaseActivity implements SurfaceHolder.Ca
         //battery
         int battery_value = systemManager.getBatteryValue();
         batteryTV.setText("Battery: " + battery_value + "%");
-    }
-
-    /**
-     * Acción 1 (Sad): Retrocede 20 cm, muestra emoción triste y LUEGO abre el video.
-     */
-    public void executeSadAction(final String nombreVideo) {
-        Log.i(ECG, "Ejecutando accion triste secuencial");
-        wanderOffNow();
-        // Guardamos que el robot se movió hacia ATRÁS
-        lastMovementDirection = MOVE_BACKWARD;
-        // 1. Mostrar emoción triste
-        temporaryEmotion(systemManager, EmotionsType.SLEEP, 10);
-        // 2. En executeSadAction() -> Color ROJO
-        LED led = new LED(LED.PART_ALL, LED.MODE_RED, (byte) 255);
-        hardWareManager.setLED(led);
-
-        AbsoluteAngleWingMotion absoluteAngleWingMotion = new AbsoluteAngleWingMotion(AbsoluteAngleWingMotion.PART_BOTH, 8, 270);
-        wingMotionManager.doAbsoluteAngleMotion(absoluteAngleWingMotion);
-        // 2. Mover hacia atrás 20 cm
-        DistanceWheelMotion motion = new DistanceWheelMotion(
-                DistanceWheelMotion.ACTION_BACK_RUN, 3, 20
-        );
-        wheelMotionManager.doDistanceMotion(motion);
-
-        // 3. Esperar a que termine de moverse para abrir el proyector
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
-                intent.putExtra("ACTION_DURING_VIDEO", nombreVideo);
-                startActivity(intent);
-                Log.i(ECG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE 0");
-            }
-        }, 2500);
-    }
-
-    /**
-     * Acción 2 (Happy): Avanza 20 cm, muestra emoción feliz y LUEGO abre el video.
-     */
-    public void executeHappyAction(final String nombreVideo) {
-        Log.i(ECG, "Ejecutando accion feliz secuencial");
-
-        wanderOffNow();
-        // Guardamos que el robot se movió hacia ADELANTE
-        lastMovementDirection = MOVE_FORWARD;
-        LocateAbsoluteAngleHeadMotion headLeft = new LocateAbsoluteAngleHeadMotion(
-                LocateAbsoluteAngleHeadMotion.ACTION_BOTH_LOCK, 0, 30
-        );
-
-        if (headMotionManager != null) {
-            headMotionManager.doAbsoluteLocateMotion(headLeft);
-        }
-        // 1. Mostrar emoción feliz
-        temporaryEmotion(systemManager, EmotionsType.SMILE, 10);
-        // 2. Luz LED Amarilla (R: 255, G: 255, B: 0)
-        // 1. En executeHappyAction() -> Color AMARILLO
-        LED led = new LED(LED.PART_ALL, LED.MODE_YELLOW, (byte) 255);
-        hardWareManager.setLED(led);
-
-        AbsoluteAngleWingMotion absoluteAngleWingMotion = new AbsoluteAngleWingMotion(AbsoluteAngleWingMotion.PART_BOTH, 8, 90);
-        wingMotionManager.doAbsoluteAngleMotion(absoluteAngleWingMotion);
-
-        // 2. Mover hacia adelante 20 cm
-        DistanceWheelMotion motion = new DistanceWheelMotion(
-                DistanceWheelMotion.ACTION_FORWARD_RUN, 3,20
-        );
-        wheelMotionManager.doDistanceMotion(motion);
-
-        LocateAbsoluteAngleHeadMotion headCenter = new LocateAbsoluteAngleHeadMotion(
-                LocateAbsoluteAngleHeadMotion.ACTION_BOTH_LOCK, 0, 90
-        );
-
-        if (headMotionManager != null) {
-            headMotionManager.doAbsoluteLocateMotion(headCenter);
-        }
-        // 3. Esperar a que termine de moverse para abrir el proyector
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
-                intent.putExtra("ACTION_DURING_VIDEO", nombreVideo);
-                startActivity(intent);
-                Log.i(ECG, "EVENTO: Reproduciendo video "  + " | Pertenece a: CLASE II");
-            }
-        }, 2500); // 2.5 segundos para completar los 20 cm
-    }
-
-    /**
-     * Acción 3 (Neutral): Establece emoción neutra, se mantiene estático y abre directamente el video.
-     */
-    public void executeNeutralAction(String nombreVideo) {
-        Log.i(ECG, "Ejecutando accion neutra");
-        wanderOffNow();
-        // No hubo movimiento de ruedas
-        lastMovementDirection = MOVE_NONE;
-        temporaryEmotion(systemManager, EmotionsType.NORMAL);
-
-        LED led = new LED(LED.PART_ALL, LED.MODE_BLUE, (byte) 255);
-        hardWareManager.setLED(led);
-
-        Intent intent = new Intent(MyBaseActivity.this, MyProjectStoryActivity.class);
-        intent.putExtra("ACTION_DURING_VIDEO", nombreVideo);
-        startActivity(intent);
-        Log.i(ECG, "EVENTO: Reproduciendo video " + " | Pertenece a: CLASE I");
-    }
-
-    public void executeAllAction(){
-        String elegido = eliminaPrimerVideoVector();
-        String nombreClase = elegido.startsWith("0") ? "Clase 0" : elegido.startsWith("1") ? "Clase I" : elegido.startsWith("2") ? "Clase II" : "Desconocida";
-        Log.i(ECG, "Ejecutando accion" + nombreClase + "video:"+ elegido);
-        switch (elegido.charAt(0)) {
-            case '0':
-                executeSadAction(elegido);
-                break;
-            case '1':
-                executeNeutralAction(elegido);
-                break;
-            case '2':
-                executeHappyAction(elegido);
-            default:
-                //video de despedida ?
-                break;
-        }
-        if (!("LOL".equals(elegido))) {
-            Log.i(ECG, "Videos restantes en la lista: " + listaVideos.size());
-            while(!mediaDecoder.isFinished()){}
-            executeAllAction();
-        }
-
     }
 }
