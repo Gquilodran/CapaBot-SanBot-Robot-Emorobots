@@ -4,6 +4,42 @@
     android:layout_height="fill_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <VideoView android:id="@+id/myvideoview"
+        android:layout_width="fill_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_height="fill_parent">
+    </VideoView>
+
+    <ImageView
+        android:id="@+id/iv_static_image"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scaleType="fitCenter"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/project"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_scale_feedback"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:background="@drawable/button_borders"
+        android:textColor="@color/colorPrimary"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <Button
         android:id="@+id/exit"
         android:layout_width="wrap_content"
@@ -19,22 +55,5 @@
         android:layout_alignParentEnd="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <VideoView android:id="@+id/myvideoview"
-        android:layout_width="fill_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_height="fill_parent">
-    </VideoView>
-
-    <ImageView
-        android:id="@+id/iv_static_image"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:scaleType="fitCenter"
-        android:src="@drawable/project"
-        android:visibility="gone" />
 
 </RelativeLayout>

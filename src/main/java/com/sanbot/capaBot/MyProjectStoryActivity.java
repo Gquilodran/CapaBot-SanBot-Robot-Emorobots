@@ -1,18 +1,23 @@
 package com.sanbot.capaBot;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.sanbot.opensdk.base.TopBaseActivity;
@@ -47,12 +52,14 @@ import static com.sanbot.capaBot.MyUtils.temporaryEmotion;
 
 /**
  * function: projection the story of vislab
- * Refactored event-driven architecture for video playback and robot movements.
+ * Refactored event-driven architecture for video playback, robot movements,
+ * and interactive scale touch logging.
  */
 public class MyProjectStoryActivity extends TopBaseActivity {
 
     private final static String TAG = "IGOR-PROJ";
     public static String ECG = "ECG-Signal";
+    private static final String TAG_ESCALA = "Escala";
 
     private static final String MOVE_NONE = "NONE";
     private static final String MOVE_FORWARD = "FORWARD";
@@ -68,6 +75,9 @@ public class MyProjectStoryActivity extends TopBaseActivity {
     @BindView(R.id.iv_static_image)
     ImageView ivStaticImage;
 
+    @BindView(R.id.tv_scale_feedback)
+    TextView tvScaleFeedback;
+
     // SDK Managers
     private ProjectorManager projectorManager;
     private SpeechManager speechManager;
@@ -81,6 +91,8 @@ public class MyProjectStoryActivity extends TopBaseActivity {
     // Video sequence state
     private List<String> listaVideos = new ArrayList<>();
     private boolean isSequenceMode = false;
+    private String ultimoVideoReproducido = "";
+    private int ultimoValorEscala = -1;
 
     private void copyAssetToStorage(String assetPath, File destinationFile) {
         try {
@@ -218,9 +230,14 @@ public class MyProjectStoryActivity extends TopBaseActivity {
     private void displayStaticImageFromAssets() {
         try {
             String[] files = getAssets().list("image");
-            String imageName = "wikidog.png";
+            String imageName = "escala.jpeg";
             if (files != null && files.length > 0) {
-                imageName = files[0];
+                for (String f : files) {
+                    if (f.toLowerCase().contains("escala")) {
+                        imageName = f;
+                        break;
+                    }
+                }
             }
             InputStream is = getAssets().open("image/" + imageName);
             final Bitmap bitmap = BitmapFactory.decodeStream(is);
@@ -232,6 +249,9 @@ public class MyProjectStoryActivity extends TopBaseActivity {
                     if (ivStaticImage != null) {
                         ivStaticImage.setImageBitmap(bitmap);
                         ivStaticImage.setVisibility(View.VISIBLE);
+                    }
+                    if (tvScaleFeedback != null) {
+                        tvScaleFeedback.setVisibility(View.GONE);
                     }
                     if (videoView != null) {
                         videoView.setVisibility(View.GONE);
@@ -256,27 +276,52 @@ public class MyProjectStoryActivity extends TopBaseActivity {
     }
 
     public void initListeners() {
+        // Listener interactivo para registrar la pulsación en la escala
+        if (ivStaticImage != null) {
+            ivStaticImage.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        v.performClick();
+                        handleScaleTouch(event.getX(), event.getY());
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        // Listener de finalización de video
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.i(TAG, "Video finalizado - Callback de fin de reproducción recibido");
+                Log.i(TAG, "Video finalizado (" + ultimoVideoReproducido + ") - Callback de fin de reproducción recibido");
 
-                if (isSequenceMode && !listaVideos.isEmpty()) {
-                    // 1. Mostrar la imagen desde assets/image/ durante el delay de 5 segundos
+                if (isSequenceMode) {
+                    // 1. Mostrar la escala desde assets/image/ durante el delay de 5 segundos
                     displayStaticImageFromAssets();
 
                     // 2. Durante los 5 segundos de espera, el robot inicia movimiento hacia postura neutra
                     executeNeutralAction(null);
 
-                    // 3. Al cumplirse los 5 segundos de delay, ocultar la imagen e invocar el siguiente ciclo de executeAllAction()
+                    // 3. Al cumplirse los 5 segundos de delay, registrar y avanzar al siguiente video
                     new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            if (ultimoValorEscala != -1) {
+                                Log.i(TAG_ESCALA, "Respuesta final registrada para video " + ultimoVideoReproducido + ": " + ultimoValorEscala);
+                            } else {
+                                Log.i(TAG_ESCALA, "Sin respuesta registrada del usuario para video " + ultimoVideoReproducido);
+                            }
+
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     if (ivStaticImage != null) {
                                         ivStaticImage.setVisibility(View.GONE);
+                                    }
+                                    if (tvScaleFeedback != null) {
+                                        tvScaleFeedback.setVisibility(View.GONE);
                                     }
                                     if (videoView != null) {
                                         videoView.setVisibility(View.VISIBLE);
@@ -302,11 +347,89 @@ public class MyProjectStoryActivity extends TopBaseActivity {
         });
     }
 
-    public void playVideo(final String nombreVideo) {
-        if (nombreVideo == null || nombreVideo.isEmpty() || "LOL".equals(nombreVideo)) {
-            Log.i(ECG, "Nombre de video no valido: " + nombreVideo);
+    /**
+     * Mapea las coordenadas táctiles sobre la escala en pantalla (1 a 9) y emite los Logs al PC.
+     */
+    private void handleScaleTouch(float touchX, float touchY) {
+        if (ivStaticImage == null) return;
+
+        Drawable drawable = ivStaticImage.getDrawable();
+        if (drawable == null) return;
+
+        int drawableWidth = drawable.getIntrinsicWidth();
+        int drawableHeight = drawable.getIntrinsicHeight();
+        if (drawableWidth <= 0 || drawableHeight <= 0) {
+            drawableWidth = 1280;
+            drawableHeight = 720;
+        }
+
+        Matrix inverse = new Matrix();
+        ivStaticImage.getImageMatrix().invert(inverse);
+        float[] pts = new float[]{touchX, touchY};
+        inverse.mapPoints(pts);
+
+        float bitmapX = pts[0];
+        float bitmapY = pts[1];
+
+        Log.d(TAG, "Touch coordenadas: view(" + touchX + ", " + touchY + ") -> bmp(" + bitmapX + ", " + bitmapY + ")");
+
+        // Bounding box horizontal de la escala en escala.jpeg (referencia 1280x720):
+        // La casilla 1 inicia en x=111, y la casilla 9 finaliza en x=1166 (ancho total 1055 para 9 casillas)
+        float scaleLeft = 111f * ((float) drawableWidth / 1280f);
+        float scaleRight = 1166f * ((float) drawableWidth / 1280f);
+        float boxWidth = (scaleRight - scaleLeft) / 9f;
+
+        // Descartar si el toque ocurre en el margen superior cercano al botón de salir
+        float topMargin = 80f * ((float) drawableHeight / 720f);
+        if (bitmapY < topMargin) {
             return;
         }
+
+        int option;
+        if (bitmapX < scaleLeft) {
+            option = 1;
+        } else if (bitmapX >= scaleRight) {
+            option = 9;
+        } else {
+            option = (int) ((bitmapX - scaleLeft) / boxWidth) + 1;
+        }
+
+        if (option < 1) option = 1;
+        if (option > 9) option = 9;
+
+        registrarSeleccionEscala(option);
+    }
+
+    /**
+     * Registra la opción elegida por el usuario, emitiendo Logs con TAG "Escala" y mostrando feedback en pantalla.
+     */
+    private void registrarSeleccionEscala(final int option) {
+        ultimoValorEscala = option;
+
+        Log.i(TAG_ESCALA, "Opcion seleccionada: " + option);
+        Log.i(TAG_ESCALA, "VALENCIA: " + option + " | Video previo: " + (ultimoVideoReproducido.isEmpty() ? "N/A" : ultimoVideoReproducido));
+        Log.i(ECG, "ESCALA VALENCIA: " + option + " | Video previo: " + (ultimoVideoReproducido.isEmpty() ? "N/A" : ultimoVideoReproducido));
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (tvScaleFeedback != null) {
+                    tvScaleFeedback.setText("Opción seleccionada: " + option);
+                    tvScaleFeedback.setVisibility(View.VISIBLE);
+                }
+                Toast.makeText(MyProjectStoryActivity.this, "Opción " + option + " registrada", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void playVideo(final String nombreVideo) {
+        if (nombreVideo == null || nombreVideo.isEmpty() || "LOL".equals(nombreVideo)) {
+            Log.i(TAG, "Nombre de video no valido: " + nombreVideo);
+            return;
+        }
+
+        ultimoVideoReproducido = nombreVideo;
+        ultimoValorEscala = -1;
 
         String carpeta_elegida = "clase 0";
         if (nombreVideo.startsWith("0")) {
@@ -319,7 +442,7 @@ public class MyProjectStoryActivity extends TopBaseActivity {
 
         String rutaAssets = "video/" + carpeta_elegida + "/" + nombreVideo;
         final File videoFile = new File(Environment.getExternalStorageDirectory(), "CAPABOT/" + carpeta_elegida + "/" + nombreVideo);
-        Log.i(ECG, "Buscando archivo en: " + videoFile.getAbsolutePath());
+        Log.i(TAG, "Buscando archivo en: " + videoFile.getAbsolutePath());
 
         if (!videoFile.exists()) {
             copyAssetToStorage(rutaAssets, videoFile);
@@ -327,6 +450,9 @@ public class MyProjectStoryActivity extends TopBaseActivity {
 
         if (ivStaticImage != null) {
             ivStaticImage.setVisibility(View.GONE);
+        }
+        if (tvScaleFeedback != null) {
+            tvScaleFeedback.setVisibility(View.GONE);
         }
         if (videoView != null) {
             videoView.setVisibility(View.VISIBLE);
@@ -336,7 +462,7 @@ public class MyProjectStoryActivity extends TopBaseActivity {
             videoView.setVideoPath(videoFile.getAbsolutePath());
             videoView.requestFocus();
             videoView.start();
-            Log.i(ECG, "EVENTO: Reproduciendo video " + nombreVideo + " | Pertenece a: " + carpeta_elegida);
+            Log.i(TAG, "EVENTO: Reproduciendo video " + nombreVideo + " | Pertenece a: " + carpeta_elegida);
 
             // Apagar LEDs 8 segundos después
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
@@ -350,7 +476,7 @@ public class MyProjectStoryActivity extends TopBaseActivity {
                 }
             }, 8000);
         } else {
-            Log.e(ECG, "ERROR: No se encontró el video en " + videoFile.getAbsolutePath());
+            Log.e(TAG, "ERROR: No se encontró el video en " + videoFile.getAbsolutePath());
         }
     }
 
@@ -384,6 +510,7 @@ public class MyProjectStoryActivity extends TopBaseActivity {
         String elegido = eliminaPrimerVideoVector();
         if ("LOL".equals(elegido) || elegido == null) {
             Log.i(ECG, "Se han reproducido todos los videos.");
+            Log.i(TAG_ESCALA, "Secuencia de videos completada.");
             if (projectorManager != null) {
                 projectorManager.switchProjector(false);
             }
@@ -456,12 +583,6 @@ public class MyProjectStoryActivity extends TopBaseActivity {
         wanderOffNow();
         lastMovementDirection = MOVE_FORWARD;
 
-        if (headMotionManager != null) {
-            LocateAbsoluteAngleHeadMotion headLeft = new LocateAbsoluteAngleHeadMotion(
-                    LocateAbsoluteAngleHeadMotion.ACTION_BOTH_LOCK, 0, 30
-            );
-            headMotionManager.doAbsoluteLocateMotion(headLeft);
-        }
         if (systemManager != null) {
             temporaryEmotion(systemManager, EmotionsType.SMILE, 10);
         }
@@ -476,12 +597,6 @@ public class MyProjectStoryActivity extends TopBaseActivity {
         if (wheelMotionManager != null) {
             DistanceWheelMotion motion = new DistanceWheelMotion(DistanceWheelMotion.ACTION_FORWARD_RUN, 3, 20);
             wheelMotionManager.doDistanceMotion(motion);
-        }
-        if (headMotionManager != null) {
-            LocateAbsoluteAngleHeadMotion headCenter = new LocateAbsoluteAngleHeadMotion(
-                    LocateAbsoluteAngleHeadMotion.ACTION_BOTH_LOCK, 0, 90
-            );
-            headMotionManager.doAbsoluteLocateMotion(headCenter);
         }
 
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
@@ -525,9 +640,10 @@ public class MyProjectStoryActivity extends TopBaseActivity {
             AbsoluteAngleWingMotion wingNeutral = new AbsoluteAngleWingMotion(AbsoluteAngleWingMotion.PART_BOTH, 8, 180);
             wingMotionManager.doAbsoluteAngleMotion(wingNeutral);
         }
+        // Corrección de postura de cabeza recta al centro (horizontal 90, vertical 30)
         if (headMotionManager != null) {
             LocateAbsoluteAngleHeadMotion headNeutral = new LocateAbsoluteAngleHeadMotion(
-                    LocateAbsoluteAngleHeadMotion.ACTION_BOTH_LOCK, 0, 90
+                    LocateAbsoluteAngleHeadMotion.ACTION_VERTICAL_LOCK, 90, 30
             );
             headMotionManager.doAbsoluteLocateMotion(headNeutral);
         }
